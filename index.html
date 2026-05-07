@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Anchor"/>
+<title>Anchor</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:#0a0a0a;color:#fff;font-family:-apple-system,sans-serif}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:#fff}
+.home{min-height:100vh;background:#0a0a0a;padding:52px 20px 40px;max-width:480px;margin:0 auto}
+.app-title{font-size:30px;font-weight:700;letter-spacing:-0.04em;margin-bottom:4px}
+.app-date{font-size:13px;color:rgba(255,255,255,0.28);margin-bottom:36px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border-radius:20px;padding:24px 18px 20px;display:flex;flex-direction:column;gap:28px;aspect-ratio:1/1;text-align:left;width:100%}
+.card:active{opacity:0.6}
+.card-emoji{font-size:24px}
+.card-label{font-size:16px;font-weight:600;letter-spacing:-0.02em}
+.screen{min-height:100vh;background:#0a0a0a}
+.hdr{position:sticky;top:0;background:rgba(10,10,10,0.95);border-bottom:1px solid rgba(255,255,255,0.06);padding:16px 20px}
+.hdr-inner{display:flex;align-items:center;gap:12px;max-width:480px;margin:0 auto}
+.back{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;padding-right:2px}
+.hdr-title{font-size:18px;font-weight:600;letter-spacing:-0.03em}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.body{max-width:480px;margin:0 auto;padding:24px 20px 60px}
+.sec{margin-bottom:24px}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sec-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sec-name{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600}
+.sec-items{padding-left:14px;border-left:1px solid rgba(255,255,255,0.07)}
+.item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;width:100%;text-align:left;border-radius:6px}
+.item:active{background:rgba(255,255,255,0.03)}
+.box{width:20px;height:20px;border-radius:5px;border:1.5px solid rgba(255,255,255,0.2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all 0.15s}
+.box.on{border:none}
+.lbl{font-size:14px;line-height:1.4;color:rgba(255,255,255,0.85);transition:all 0.15s}
+.lbl.on{color:rgba(255,255,255,0.28);text-decoration:line-through}
+.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:20px}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 2px;border-radius:8px}
+.tab.on{background:rgba(255,255,255,0.1)}
+.tab-d{font-size:9px;letter-spacing:0.05em;font-weight:500;color:rgba(255,255,255,0.3);text-transform:uppercase}
+.tab.on .tab-d{color:#fff}
+.tab-dot{width:4px;height:4px;border-radius:50%}
+.note{font-size:11px;color:rgba(255,255,255,0.18);margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var DFULL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var SCH={
+ 0:{l:"SWIM + GYM",s:"Chest/Back",t:["Swimming","Chest + Back"],f:["Pre-swim — Greek yogurt + banana","School snack — protein bar + banana","School lunch — chicken bowl","Post-gym — 5 eggs + 2 bananas","Dinner — tuna + 1 cup rice"]},
+ 1:{l:"GYM",s:"Legs",t:["Legs"],f:["School snack — protein bar + banana","School lunch — chicken bowl","Post-gym — 5 eggs + 2 bananas","Dinner — tuna + 1 cup rice"]},
+ 2:{l:"SWIM + GYM",s:"Arms",t:["Swimming","Arms"],f:["Pre-swim — Greek yogurt + banana","School snack — protein bar + banana","School lunch — chicken bowl","Post-gym — 5 eggs + 2 bananas","Dinner — tuna + 1 cup rice"]},
+ 3:{l:"GYM",s:"Chest/Back",t:["Chest + Back"],f:["School snack — protein bar + banana","School lunch — chicken bowl","Post-gym — 5 eggs + 2 bananas","Dinner — tuna + 1 cup rice"]},
+ 4:{l:"SWIM",s:"Recovery",t:["Swimming"],f:["Pre-swim — Greek yogurt + banana","Breakfast — eggs","Lunch — chicken bowl + banana","Dinner — tuna + rice + banana"]},
+ 5:{l:"REST",s:"Recovery",t:["Rest day"],f:["Breakfast — eggs","Lunch — grandma's food","Dinner — tuna + Greek yogurt"]},
+ 6:{l:"GYM",s:"Arms",t:["Arms"],f:["School snack — protein bar + banana","School lunch — chicken bowl","Post-gym — 5 eggs + 2 bananas","Dinner — tuna + 1 cup rice"]}
+};
+var SAM=["Creatine — 5g","Omega-3 fish oil gummies","Vitamin D3","Vitamin C"];
+var SPM=["Magnesium"];
+var REC=["15-min easy walk","5-min stretching — hips, shoulders, back"];
+var WAT=["Bottle 1","Bottle 2","Bottle 3","Bottle 4","Bottle 5","Bottle 6"];
+var BRN=["12 Ayas — Quran","Duolingo practice #1","Duolingo practice #2","SAT article","1 SAT vocab word","Speaking practice"];
+var CARDS=[
+ {k:"brain",e:"🧠",l:"Brain",c:"#c9b8ff",bg:"rgba(201,184,255,0.07)",b:"rgba(201,184,255,0.15)"},
+ {k:"training",e:"🏋️",l:"Training",c:"#a8e6cf",bg:"rgba(168,230,207,0.07)",b:"rgba(168,230,207,0.15)"},
+ {k:"supplements",e:"💊",l:"Supplements",c:"#d4a5f5",bg:"rgba(212,165,245,0.07)",b:"rgba(212,165,245,0.15)"},
+ {k:"recovery",e:"🔄",l:"Recovery",c:"#85d1f7",bg:"rgba(133,209,247,0.07)",b:"rgba(133,209,247,0.15)"},
+ {k:"food",e:"🍽️",l:"Food",c:"#ffd3b6",bg:"rgba(255,211,182,0.07)",b:"rgba(255,211,182,0.15)"},
+ {k:"water",e:"💧",l:"Water",c:"#67d4f7",bg:"rgba(103,212,247,0.07)",b:"rgba(103,212,247,0.15)"}
+];
+
+function dkey(sec,x,item){
+ var d=new Date();
+ return ("a"+sec+d.getFullYear()+d.getMonth()+d.getDate()+x+item).replace(/[^a-z0-9]/gi,"").slice(0,60);
+}
+function got(k){try{return localStorage.getItem(k)==="1"}catch(e){return false}}
+function put(k,v){try{v?localStorage.setItem(k,"1"):localStorage.removeItem(k)}catch(e){}}
+
+function div(cls,html){var e=document.createElement("div");if(cls)e.className=cls;if(html)e.innerHTML=html;return e}
+function btn(cls,html,fn){var e=document.createElement("button");if(cls)e.className=cls;if(html)e.innerHTML=html;if(fn)e.onclick=fn;return e}
+
+function makeItem(label,color,key){
+ var checked=got(key);
+ var box=div("box"+(checked?" on":""));
+ box.style.background=checked?color:"transparent";
+ if(checked)box.innerHTML="✓";
+ var lbl=div("lbl"+(checked?" on":""));
+ lbl.textContent=label;
+ var b=btn("item","",function(){
+  checked=!checked;
+  put(key,checked);
+  box.className="box"+(checked?" on":"");
+  box.style.background=checked?color:"transparent";
+  box.innerHTML=checked?"✓":"";
+  lbl.className="lbl"+(checked?" on":"");
+ });
+ b.appendChild(box);
+ b.appendChild(lbl);
+ return b;
+}
+
+function makeSection(title,items,color,sk,ex){
+ ex=ex||"";
+ var s=div("sec");
+ var h=div("sec-head");
+ var dot=div("sec-dot");dot.style.background=color;
+ var nm=div("sec-name");nm.textContent=title;nm.style.color=color;
+ h.appendChild(dot);h.appendChild(nm);
+ var list=div("sec-items");
+ items.forEach(function(item,i){
+  list.appendChild(makeItem(item,color,dkey(sk,ex+i,item.slice(0,15))));
+ });
+ s.appendChild(h);s.appendChild(list);
+ return s;
+}
+
+function makeBack(fn){
+ return btn("back","‹",fn);
+}
+
+function makeHeader(title,sub,backFn){
+ var hdr=div("hdr");
+ var inner=div("hdr-inner");
+ inner.appendChild(makeBack(backFn));
+ var txt=div("");
+ var t=div("hdr-title");t.textContent=title;
+ txt.appendChild(t);
+ if(sub){var s=div("hdr-sub");s.textContent=sub;txt.appendChild(s);}
+ inner.appendChild(txt);
+ hdr.appendChild(inner);
+ return hdr;
+}
+
+function makeTabs(active,onChange){
+ var today=new Date().getDay();
+ var wrap=div("tabs");
+ DAYS.forEach(function(d,i){
+  var t=btn("tab"+(i===active?" on":""),"",function(){onChange(i);});
+  var dl=div("tab-d");dl.textContent=d;
+  var dot=div("tab-dot");
+  dot.style.background=i===today?(i===active?"#fff":"rgba(255,255,255,0.4)"):"transparent";
+  t.appendChild(dl);t.appendChild(dot);
+  wrap.appendChild(t);
+ });
+ return wrap;
+}
+
+function render(el){
+ var app=document.getElementById("app");
+ app.innerHTML="";
+ app.appendChild(el);
+ window.scrollTo(0,0);
+}
+
+function showHome(){
+ var today=new Date();
+ var wrap=div("home");
+ var t=div("app-title");t.textContent="Anchor";
+ var dt=div("app-date");
+ dt.textContent=DFULL[today.getDay()]+" · "+today.toLocaleDateString("en-US",{month:"long",day:"numeric"});
+ wrap.appendChild(t);wrap.appendChild(dt);
+ var grid=div("grid");
+ CARDS.forEach(function(card){
+  var c=btn("card","",function(){showScreen(card.k);});
+  c.style.background=card.bg;
+  c.style.border="1px solid "+card.b;
+  var em=div("card-emoji");em.textContent=card.e;
+  var lb=div("card-label");lb.textContent=card.l;lb.style.color=card.c;
+  c.appendChild(em);c.appendChild(lb);
+  grid.appendChild(c);
+ });
+ wrap.appendChild(grid);
+ render(wrap);
+}
+
+function makeShell(title,sub,buildFn){
+ var s=div("screen");
+ s.appendChild(makeHeader(title,sub,showHome));
+ var body=div("body");
+ buildFn(body);
+ var note=div("note");note.textContent="Checks reset daily";
+ body.appendChild(note);
+ s.appendChild(body);
+ return s;
+}
+
+function showScreen(key){
+ var today=new Date().getDay();
+ if(key==="brain"){
+  render(makeShell("Brain",DFULL[today]+" · Daily",function(b){
+   b.appendChild(makeSection("Today's Practice",BRN,"#c9b8ff","brain","b"));
+  }));
+ } else if(key==="supplements"){
+  render(makeShell("Supplements","Daily stack",function(b){
+   b.appendChild(makeSection("Morning",SAM,"#d4a5f5","supp","am"));
+   b.appendChild(makeSection("Night — 60–90 min before bed",SPM,"#d4a5f5","supp","pm"));
+  }));
+ } else if(key==="recovery"){
+  render(makeShell("Recovery","Every day",function(b){
+   b.appendChild(makeSection("Everyday Recovery",REC,"#85d1f7","rec","r"));
+  }));
+ } else if(key==="water"){
+  render(makeShell("Water","6 bottles daily",function(b){
+   b.appendChild(makeSection("Daily Water",WAT,"#67d4f7","water","w"));
+  }));
+ } else if(key==="training"){
+  var ad=today;
+  var s=div("screen");
+  var day=SCH[ad];
+  var subEl=div("hdr-sub");subEl.textContent=DFULL[ad]+" · "+day.l+(day.s?" — "+day.s:"");
+  var hdr=div("hdr");
+  var inner=div("hdr-inner");
+  inner.appendChild(makeBack(showHome));
+  var txt=div("");
+  var tt=div("hdr-title");tt.textContent="Training";
+  txt.appendChild(tt);txt.appendChild(subEl);
+  inner.appendChild(txt);hdr.appendChild(inner);
+  s.appendChild(hdr);
+  var body=div("body");
+  function rebuildT(){
+   body.innerHTML="";
+   day=SCH[ad];
+   subEl.textContent=DFULL[ad]+" · "+day.l+(day.s?" — "+day.s:"");
+   body.appendChild(makeTabs(ad,function(i){ad=i;rebuildT();}));
+   body.appendChild(makeSection(day.l==="REST"?"Rest":"Training",day.t,"#a8e6cf","train","d"+ad));
+   var note=div("note");note.textContent="Checks reset daily";body.appendChild(note);
+  }
+  rebuildT();
+  s.appendChild(body);
+  render(s);
+ } else if(key==="food"){
+  var ad2=today;
+  var s2=div("screen");
+  var day2=SCH[ad2];
+  var subEl2=div("hdr-sub");subEl2.textContent=DFULL[ad2]+" · "+day2.l;
+  var hdr2=div("hdr");
+  var inner2=div("hdr-inner");
+  inner2.appendChild(makeBack(showHome));
+  var txt2=div("");
+  var tt2=div("hdr-title");tt2.textContent="Food";
+  txt2.appendChild(tt2);txt2.appendChild(subEl2);
+  inner2.appendChild(txt2);hdr2.appendChild(inner2);
+  s2.appendChild(hdr2);
+  var body2=div("body");
+  function rebuildF(){
+   body2.innerHTML="";
+   day2=SCH[ad2];
+   subEl2.textContent=DFULL[ad2]+" · "+day2.l;
+   body2.appendChild(makeTabs(ad2,function(i){ad2=i;rebuildF();}));
+   body2.appendChild(makeSection("Today's Meals",day2.f,"#ffd3b6","food","d"+ad2));
+   var note=div("note");note.textContent="Checks reset daily";body2.appendChild(note);
+  }
+  rebuildF();
+  s2.appendChild(body2);
+  render(s2);
+ }
+}
+
+showHome();
+</script>
+</body>
+</html>
